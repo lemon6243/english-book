@@ -246,7 +246,7 @@ button.pet { cursor: pointer; }
   var PHOTO_CARD = '<div class="photo" id="ph-card" hidden><div><b class="lab" style="margin:0">사진으로 문장 가져오기</b>' +
     '<p class="muted">책 페이지를 사진으로 올리면 영어 문장을 읽어 아래 입력창에 넣습니다. 여러 장을 한 번에 고를 수 있습니다.</p></div>' +
     '<label class="toggle"><input type="checkbox" id="ph-gen" checked> 읽은 뒤 한국어 뜻과 핵심 단어도 함께 만들기</label>' +
-    '<label class="btn ghost" for="ph-file" id="ph-btn">사진 촬영 또는 선택</label><input type="file" id="ph-file" multiple hidden>' +
+    '<div class="row" id="ph-btn"><label class="btn ghost" for="ph-cam">사진 찍기</label><label class="btn ghost" for="ph-file">갤러리에서 선택</label></div><input type="file" id="ph-cam" accept="image/*" capture="environment" hidden><input type="file" id="ph-file" multiple hidden>' +
     '<p class="msg" id="ph-msg" role="status"></p><button class="btn plain" data-a="photo-stop" id="ph-stop" hidden>중단</button></div>';
 
   function sampleBook() {
@@ -1101,6 +1101,7 @@ button.pet { cursor: pointer; }
       case 'xl-run': xlRun(); return;
       case 'xl-text-run': xlTextRun(); return;
       case 'xl-mic': xlMic(); return;
+      case 'xl-clear': xl.files = []; break;
       case 'xl-lang': xl.lang = t.getAttribute('data-v'); break;
       case 'gm-save':
         var gk = val('gm-key').trim(), gmod = val('gm-model').trim() || GEM_MODEL, old = gemCfg();
@@ -1249,8 +1250,8 @@ button.pet { cursor: pointer; }
       '<div class="row">' + (dict ? '<button class="btn ghost" data-a="xl-mic" aria-pressed="' + (xl.listening ? 'true' : 'false') + '"' + (xl.busy ? ' disabled' : '') + '>' + (xl.listening ? '듣는 중 · 누르면 멈춤' : '마이크로 말하기') + '</button>' : '') +
       '<button class="btn" data-a="xl-text-run"' + (xl.text.trim() && !xl.busy ? '' : ' disabled') + '>글자 번역하기</button></div>' + (photo ? '' : stop) + '</div>';
     var photoCard = photo ? '<div class="card"><p class="muted">책 페이지를 사진으로 찍거나 고르면 영어 문장을 읽고 한국어로 번역해 줍니다. 한 번에 5장까지 고를 수 있습니다.</p>' +
-      '<label class="btn ghost" for="xl-file">사진 촬영 또는 선택</label><input type="file" id="xl-file" multiple hidden>' +
-      '<p class="muted">' + (xl.files.length ? '선택한 사진 ' + xl.files.length + '장' : '선택한 사진이 없습니다.') + '</p>' +
+      '<div class="row"><label class="btn ghost" for="xl-cam">사진 찍기</label><label class="btn ghost" for="xl-file">갤러리에서 선택</label></div><input type="file" id="xl-cam" accept="image/*" capture="environment" hidden><input type="file" id="xl-file" multiple hidden>' +
+      '<p class="muted">' + (xl.files.length ? '선택한 사진 ' + xl.files.length + '장 (최대 5장)' : '선택한 사진이 없습니다.') + '</p>' + (xl.files.length ? '<button class="btn plain" data-a="xl-clear">사진 비우기</button>' : '') +
       '<button class="btn big" data-a="xl-run"' + (xl.files.length && !xl.busy ? '' : ' disabled') + '>사진 번역하기</button>' + stop + '</div>' : '';
     var gemFoot = gem ? '<details class="card"' + (xl.gemOpen ? ' open' : '') + '><summary>번역 설정</summary>' + gemCard.replace('<div class="card">', '<div>') + '</details>' : '';
     return top + photoCard + textCard +
@@ -1539,9 +1540,9 @@ button.pet { cursor: pointer; }
     if (e.target.id === 'shuf') { state.shuffle = e.target.checked; save(); }
     if (e.target.id === 'cheer') { state.cheer = e.target.checked; save(); }
     if (e.target.id === 'xl-ko') { xl.showKo = e.target.checked; render('keep'); }
-    if (e.target.id === 'xl-file' && e.target.files) { xl.files = Array.prototype.slice.call(e.target.files, 0, 5); xl.results = []; xl.msg = ''; e.target.value = ''; render('keep'); }
+    if ((e.target.id === 'xl-file' || e.target.id === 'xl-cam') && e.target.files) { xl.files = xl.files.concat(Array.prototype.slice.call(e.target.files)).slice(0, 5); xl.msg = ''; e.target.value = ''; render('keep'); }
     if (e.target.id === 'follow') { state.follow = e.target.checked; save(); }
-    if (e.target.id === 'ph-file' && photo && e.target.files && e.target.files.length) {
+    if ((e.target.id === 'ph-file' || e.target.id === 'ph-cam') && photo && e.target.files && e.target.files.length) {
       var picked = Array.prototype.slice.call(e.target.files); e.target.value = ''; readPhotos(picked);
     }
   });
